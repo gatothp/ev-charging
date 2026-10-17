@@ -1,71 +1,512 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EV Charging Calculator</title>
-<script>
-window.savedLang=localStorage.getItem('evCalcLang')||'id';
-document.documentElement.lang=window.savedLang;
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator Pengisian EV – Chery Q</title>
 <style>
-:root{--navy:#102a56;--blue:#2575e8;--green:#1e9b55;--ink:#17294b;--muted:#60708f;--line:#dce5f0;--bg:#f4f8fc;--card:#fff}*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,#f7fbff,#eef6f5);color:var(--ink)}.wrap{max-width:1250px;margin:auto;padding:28px;min-height:100vh;display:flex;flex-direction:column}.hero{display:flex;align-items:center;gap:18px;margin-bottom:40px}.logo{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#1977e8,#20a85c);display:grid;place-items:center;color:white;font-size:40px;box-shadow:0 10px 25px #2575e82b}.hero-content{flex:1}.hero h1{margin:0;font-size:42px;color:#112a55;font-weight:900}.hero p{margin:12px 0 0;color:var(--muted);font-size:18px;line-height:1.5}.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:40px}.feature-card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 8px 30px #1b3d6610;transition:all 0.3s ease;cursor:pointer;text-decoration:none;color:inherit;display:block}.feature-card:hover{transform:translateY(-8px);box-shadow:0 15px 40px #1b3d6625;border-color:#2575e8}.feature-icon{font-size:48px;margin-bottom:16px;display:inline-block}.feature-card h3{margin:0 0 12px;font-size:20px;color:#112a55;font-weight:700}.feature-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}.footer{text-align:center;color:#71809a;font-size:12px;padding:20px;margin-top:auto;border-top:1px solid var(--line)}.language-btn{position:fixed;top:20px;right:20px;border:1px solid #cfdbe9;background:white;border-radius:10px;padding:9px 13px;font-weight:800;color:#102a56;cursor:pointer;z-index:100}@media(max-width:768px){.hero{flex-direction:column;align-items:flex-start;margin-bottom:30px}.hero-content{width:100%}.hero h1{font-size:32px}.hero p{font-size:16px}.logo{width:60px;height:60px;font-size:30px}.features{grid-template-columns:1fr}.buttons-container{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.btn{padding:14px 24px;font-size:14px}.wrap{padding:16px}}@media(max-width:480px){.hero h1{font-size:26px}.hero p{font-size:14px}.logo{width:50px;height:50px;font-size:24px}.feature-card{padding:20px}.feature-card h3{font-size:18px}.buttons-container{grid-template-columns:1fr}.btn{padding:12px 20px;font-size:13px}.stats{grid-template-columns:1fr}.stat-number{font-size:28px}.language-btn{top:12px;right:12px;padding:8px 11px;font-size:13px}.wrap{padding:12px}}
-</style></head>
+  /* ── Reset & Tokens ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c-bg:        #f2f6fc;
+    --c-surface:   #ffffff;
+    --c-border:    #dce5f0;
+    --c-ink:       #17294b;
+    --c-muted:     #60708f;
+    --c-blue:      #2575e8;
+    --c-blue-lt:   #e8f0fe;
+    --c-green:     #1a9952;
+    --c-green-lt:  #e6f7ee;
+    --c-amber:     #d97706;
+    --c-amber-lt:  #fff7e6;
+    --c-red:       #c62828;
+    --radius-card: 20px;
+    --radius-in:   12px;
+    --shadow:      0 6px 28px #1b3d660f;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    background: var(--c-bg);
+    color: var(--c-ink);
+    min-height: 100dvh;
+    padding: 0 0 48px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--c-border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-logo {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2575e8, #1a9952);
+    display: grid; place-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 16px; font-weight: 800; color: var(--c-ink); flex: 1; line-height: 1.2; }
+  .topbar-sub   { font-size: 11px; color: var(--c-muted); }
+  /* ── Layout ── */
+  .page { max-width: 760px; margin: 0 auto; padding: 24px 16px 0; }
+
+  /* ── Section card ── */
+  .card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .card-head-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: var(--c-blue-lt);
+    display: grid; place-items: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .card-head-icon.green { background: var(--c-green-lt); }
+  .card-head-icon.amber { background: var(--c-amber-lt); }
+  .card-head h2 { font-size: 15px; font-weight: 800; color: var(--c-ink); }
+  .card-head p  { font-size: 12px; color: var(--c-muted); margin-top: 2px; }
+  .card-body { padding: 20px; }
+
+  /* ── Field grid ── */
+  .fields { display: grid; gap: 14px; }
+  .fields-2 { grid-template-columns: 1fr 1fr; }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--c-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .input-wrap { display: flex; }
+  .input-wrap input, .input-wrap select {
+    flex: 1;
+    height: 46px;
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius-in);
+    padding: 0 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--c-ink);
+    background: var(--c-surface);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    -webkit-appearance: none;
+  }
+  .input-wrap input:focus, .input-wrap select:focus {
+    border-color: var(--c-blue);
+    box-shadow: 0 0 0 3px #2575e820;
+  }
+  .input-wrap input[readonly] {
+    background: #f7f9fc;
+    color: var(--c-muted);
+    cursor: default;
+  }
+  .input-wrap .unit {
+    height: 46px;
+    padding: 0 14px;
+    display: flex; align-items: center;
+    background: #f2f6fa;
+    border: 1.5px solid var(--c-border);
+    border-left: none;
+    border-radius: 0 var(--radius-in) var(--radius-in) 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--c-muted);
+    white-space: nowrap;
+  }
+  .input-wrap input:focus ~ .unit {
+    border-color: var(--c-blue);
+    border-left: none;
+  }
+  /* Make border seamless on focus */
+  .input-wrap:focus-within input,
+  .input-wrap:focus-within select {
+    border-radius: var(--radius-in) 0 0 var(--radius-in);
+    border-right-color: transparent;
+  }
+  .input-wrap:focus-within .unit { border-color: var(--c-blue); }
+
+  .hint {
+    font-size: 11px;
+    color: var(--c-muted);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+
+  /* ── Toggle for advanced ── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--c-border);
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--c-blue);
+  }
+  .toggle-row:hover { background: var(--c-blue-lt); }
+  .toggle-arrow { transition: transform .2s; }
+  .toggle-arrow.open { transform: rotate(180deg); }
+  .toggle-content { padding: 0 20px 20px; }
+  .toggle-content.hidden { display: none; }
+
+  /* ── Action buttons ── */
+  .actions {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--c-border);
+    justify-content: flex-end;
+  }
+  .btn {
+    height: 46px;
+    border: 0;
+    border-radius: var(--radius-in);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 22px;
+    transition: transform .1s, opacity .1s;
+  }
+  .btn:active { transform: scale(.97); opacity: .9; }
+  .btn-primary { background: var(--c-blue); color: #fff; }
+  .btn-secondary { background: #edf2f7; color: #435575; }
+
+  /* ── Results ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 20px;
+  }
+  .result-tile {
+    border-radius: 16px;
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .result-tile.energy  { background: var(--c-blue-lt);  }
+  .result-tile.time    { background: var(--c-amber-lt);  }
+  .result-tile.freq    { background: var(--c-green-lt);  }
+  .result-tile .tile-icon { font-size: 22px; }
+  .result-tile .tile-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .result-tile .tile-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--c-ink);
+    line-height: 1;
+    word-break: break-word;
+  }
+  .result-tile.energy .tile-value { color: var(--c-blue); }
+  .result-tile.time   .tile-value { color: var(--c-amber); }
+  .result-tile.freq   .tile-value { color: var(--c-green); }
+  .result-tile .tile-sub {
+    font-size: 11px;
+    color: var(--c-muted);
+    line-height: 1.4;
+  }
+
+  /* ── Error ── */
+  .error-msg {
+    color: var(--c-red);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 20px 12px;
+    display: none;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--c-muted);
+    padding-top: 28px;
+  }
+  .footer a { color: var(--c-blue); text-decoration: none; }
+
+  /* ── Animations ── */
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .result-tile { animation: pop-in .25s ease both; }
+  .result-tile:nth-child(2) { animation-delay: .06s; }
+  .result-tile:nth-child(3) { animation-delay: .12s; }
+
+  /* ── Mobile overrides ── */
+  @media (max-width: 520px) {
+    .topbar-title { font-size: 14px; }
+    .page { padding: 16px 12px 0; }
+    .card-head { padding: 14px 16px 12px; }
+    .card-body { padding: 16px; }
+    .fields-2 { grid-template-columns: 1fr; }
+    .results-grid { grid-template-columns: 1fr; gap: 10px; padding: 14px; }
+    .result-tile { flex-direction: row; align-items: center; gap: 14px; padding: 14px; }
+    .result-tile .tile-icon { font-size: 28px; }
+    .result-tile .tile-value { font-size: 22px; }
+    .toggle-row { padding: 12px 16px; }
+    .toggle-content { padding: 0 16px 16px; }
+    .error-msg { padding: 0 14px 10px; }
+  }
+  @media (max-width: 360px) {
+    .result-tile .tile-value { font-size: 18px; }
+  }
+</style>
+</head>
 <body>
-<button id="langBtn" class="language-btn">🇮🇩</button>
-<main class="wrap">
-<section class="hero">
-<div class="logo">⚡</div>
-<div class="hero-content">
-<h1>EV Charging Calculator</h1>
-</div>
-</section>
 
-<section class="features">
-<a href="weekly-charging.html" class="feature-card">
-<div class="feature-icon">📊</div>
-<h3>Weekly Charging</h3>
-<p>Calculate weekly energy needs based on vehicle specs and driving distance.</p>
-</a>
+<!-- Top Bar -->
+<header class="topbar">
+  <div class="topbar-logo">⚡</div>
+  <div class="topbar-title">
+    EV Charging Calculator
+    <div class="topbar-sub">Berbasis Chery Q · Hitung kebutuhan & frekuensi pengisian</div>
+  </div>
+</header>
 
-<a href="charging-cost.html" class="feature-card">
-<div class="feature-icon">💰</div>
-<h3>Charging Cost</h3>
-<p>Estimate charging time and cost for a single session.</p>
-</a>
+<main class="page">
 
-<a href="about.html" class="feature-card">
-<div class="feature-icon">ℹ️</div>
-<h3>Learn More</h3>
-<p>Discover supported models, how it works, and get support.</p>
-</a>
-</section>
+  <!-- INPUT SECTION -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-icon">📋</div>
+      <div>
+        <h2>Data Anda</h2>
+        <p>Masukkan data perjalanan dan daya listrik Anda</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="fields fields-2">
+        <div class="field">
+          <label>Perjalanan per pekan</label>
+          <div class="input-wrap">
+            <input type="number" id="distance" min="0" step="1" value="350">
+            <span class="unit">km</span>
+          </div>
+          <div class="hint">Total jarak berkendara dalam satu minggu</div>
+        </div>
+        <div class="field">
+          <label>Kekuatan arus pengisian</label>
+          <div class="input-wrap">
+            <input type="number" id="current" min="0.1" step="0.1" value="8">
+            <span class="unit">A</span>
+          </div>
+          <div class="hint">Arus listrik yang tersedia di charger</div>
+        </div>
+      </div>
+    </div>
 
-<footer class="footer">
-EV Charging Calculator · Client-side calculation · No data is sent to a server · <a href="mailto:gatothp@yahoo.com" style="color:#2575e8;text-decoration:none">Contact Us</a>
-</footer>
+    <div class="toggle-row" id="toggleRow" role="button" tabindex="0" aria-expanded="false">
+      <span>⚙️ &nbsp;Parameter default (opsional)</span>
+      <span class="toggle-arrow" id="toggleArrow">▾</span>
+    </div>
+    <div class="toggle-content hidden" id="toggleContent">
+      <div class="fields fields-2" style="padding-top:4px">
+        <div class="field">
+          <label>Efisiensi kendaraan</label>
+          <div class="input-wrap">
+            <input type="number" id="vehicleEff" min="0.1" step="0.1" value="7.1">
+            <span class="unit">km/kWh</span>
+          </div>
+          <div class="hint">Default: Chery Q (7.1 km/kWh)</div>
+        </div>
+        <div class="field">
+          <label>Tegangan listrik</label>
+          <div class="input-wrap">
+            <input type="number" id="voltage" min="1" step="1" value="220">
+            <span class="unit">V</span>
+          </div>
+          <div class="hint">Tegangan jaringan rumah (220V di Indonesia)</div>
+        </div>
+        <div class="field">
+          <label>Efisiensi charging</label>
+          <div class="input-wrap">
+            <input type="number" id="chargingEff" min="1" max="100" step="1" value="90">
+            <span class="unit">%</span>
+          </div>
+          <div class="hint">Kehilangan energi saat pengisian (default 90%)</div>
+        </div>
+        <div class="field">
+          <label>Durasi sekali charge</label>
+          <div class="input-wrap">
+            <input type="number" id="sessionTime" min="0.5" step="0.5" value="8">
+            <span class="unit">jam</span>
+          </div>
+          <div class="hint">Durasi charging dalam satu sesi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="resetBtn" type="button">↻ Atur Ulang</button>
+      <button class="btn btn-primary" id="calcBtn" type="button">→ Hitung</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <div class="card" id="resultsCard">
+    <div class="card-head">
+      <div class="card-head-icon green">📊</div>
+      <div>
+        <h2>Hasil Perhitungan</h2>
+        <p>Berdasarkan data yang dimasukkan</p>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="result-tile energy">
+        <div class="tile-icon">⚡</div>
+        <div>
+          <div class="tile-label">Kebutuhan Daya</div>
+          <div class="tile-value" id="out-energy">—</div>
+          <div class="tile-sub">kWh/pekan ke baterai</div>
+        </div>
+      </div>
+      <div class="result-tile time">
+        <div class="tile-icon">⏱️</div>
+        <div>
+          <div class="tile-label">Total Waktu Charge</div>
+          <div class="tile-value" id="out-time">—</div>
+          <div class="tile-sub">untuk memenuhi kebutuhan pekan ini</div>
+        </div>
+      </div>
+      <div class="result-tile freq">
+        <div class="tile-icon">🔌</div>
+        <div>
+          <div class="tile-label">Frekuensi Charge</div>
+          <div class="tile-value" id="out-freq">—</div>
+          <div class="tile-sub">kali pengisian per minggu</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <p>EV Charging Calculator &middot; Perhitungan di perangkat &middot; Tidak ada data yang dikirim ke server</p>
+    <p style="margin-top:6px"><a href="mailto:gatothp@yahoo.com">gatothp@yahoo.com</a></p>
+  </footer>
+
 </main>
 
 <script>
-let lang=localStorage.getItem('evCalcLang')||'id';
-const translations={
-'EV Charging Calculator':'Kalkulator Pengisian EV',
-'EV Models Supported':'Model EV yang Didukung',
-'Languages Available':'Bahasa Tersedia',
-'Private & Secure':'Pribadi & Aman',
-'Powerful Tools':'Alat Ampuh',
-'Weekly Charging':'Pengisian Mingguan',
-'Calculate weekly energy needs based on vehicle specs and driving distance.':'Hitung kebutuhan energi mingguan berdasarkan spesifikasi kendaraan dan jarak berkendara.',
-'Charging Cost':'Biaya Pengisian',
-'Estimate charging time and cost for a single session.':'Perkirakan waktu pengisian dan biaya untuk satu sesi.',
-'Learn More':'Pelajari Lebih Lanjut',
-'Discover supported models, how it works, and get support.':'Temukan model yang didukung, cara kerjanya, dan dapatkan dukungan.',
-'Client-side calculation · No data is sent to a server · Contact Us':'Perhitungan di sisi perangkat · Tidak ada data yang dikirim ke server · Hubungi Kami'
-};
-const $=id=>document.getElementById(id);
-const reverseTranslations=Object.fromEntries(Object.entries(translations).map(([en,id])=>[id,en]));
-function translatePage(){document.querySelectorAll('body *').forEach(el=>{if(el.tagName==='SCRIPT'||el.tagName==='STYLE')return;el.childNodes.forEach(n=>{if(n.nodeType===3){const key=n.textContent.trim(),next=lang==='id'?translations[key]:reverseTranslations[key];if(next)n.textContent=n.textContent.replace(key,next)}})});$('langBtn').textContent=lang==='en'?'🇮🇩':'🇬🇧';document.documentElement.lang=lang}
-$('langBtn').onclick=()=>{lang=lang==='en'?'id':'en';localStorage.setItem('evCalcLang',lang);translatePage()};
-translatePage();
+function $(id) { return document.getElementById(id); }
+
+// ── Toggle advanced ──────────────────────────────────────────────────────────
+function initToggle() {
+  const row  = $('toggleRow');
+  const cont = $('toggleContent');
+  const arr  = $('toggleArrow');
+  function toggle() {
+    const open = !cont.classList.contains('hidden');
+    cont.classList.toggle('hidden', open);
+    arr.classList.toggle('open', !open);
+    row.setAttribute('aria-expanded', String(!open));
+  }
+  row.addEventListener('click', toggle);
+  row.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+}
+
+// ── Calculate ────────────────────────────────────────────────────────────────
+function calculate() {
+  const distance    = parseFloat($('distance').value)    || 0;
+  const current     = parseFloat($('current').value)     || 0;
+  const vehicleEff  = parseFloat($('vehicleEff').value)  || 0;
+  const voltage     = parseFloat($('voltage').value)     || 0;
+  const chargingEff = parseFloat($('chargingEff').value) || 0;
+  const sessionTime = parseFloat($('sessionTime').value) || 0;
+
+  const errEl = $('errorMsg');
+  let err = '';
+  if (distance <= 0 || current <= 0 || vehicleEff <= 0 || voltage <= 0 || sessionTime <= 0)
+    err = 'Nilai tidak boleh nol atau negatif.';
+  else if (chargingEff <= 0 || chargingEff > 100)
+    err = 'Efisiensi harus antara 1% dan 100%.';
+
+  errEl.style.display = err ? 'block' : 'none';
+  errEl.textContent = err;
+  if (err) return;
+
+  // Kebutuhan daya = jarak / efisiensi_kendaraan
+  const energyNeeded  = distance / vehicleEff;
+  // Daya pengisian = tegangan × arus / 1000
+  const chargingPower = (voltage * current) / 1000;
+  // Energi dari jaringan = energyNeeded / (chargingEff/100)
+  const gridEnergy    = energyNeeded / (chargingEff / 100);
+  // Total waktu charge = gridEnergy / chargingPower
+  const totalHours    = gridEnergy / chargingPower;
+  const totalMin      = Math.round(totalHours * 60);
+  const hh            = Math.floor(totalMin / 60);
+  const mm            = totalMin % 60;
+  // Frekuensi = ROUNDUP(totalHours / sessionTime)
+  const freq          = Math.ceil(totalHours / sessionTime);
+
+  $('out-energy').textContent = energyNeeded.toFixed(2) + ' kWh';
+  $('out-time').textContent   = `${hh} jam ${mm} mnt`;
+  $('out-freq').textContent   = `${freq}×`;
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+function resetAll() {
+  $('distance').value    = 350;
+  $('current').value     = 8;
+  $('vehicleEff').value  = 7.1;
+  $('voltage').value     = 220;
+  $('chargingEff').value = 90;
+  $('sessionTime').value = 8;
+  calculate();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initToggle();
+  ['distance','current','vehicleEff','voltage','chargingEff','sessionTime']
+    .forEach(id => $(id).addEventListener('input', calculate));
+  $('calcBtn').addEventListener('click', calculate);
+  $('resetBtn').addEventListener('click', resetAll);
+  calculate();
+});
 </script>
 </body>
 </html>
